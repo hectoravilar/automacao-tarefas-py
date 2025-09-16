@@ -1,0 +1,3 @@
+# ignorando arquivos de variaveis de ambiente para segurança
+.env
+__pycache__/
