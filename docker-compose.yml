@@ -1,11 +1,19 @@
+# definindo a versão do docker-compose
 version: '3.8'
 
+# configurando os serviços
 services:
   autotarefaspy:
+    # construindo a imagem a partir do dockerfile local
     build: .
+    # nomeando o container
     container_name: autotarefaspy
+    # mapeando volumes para persistir screenshots
     volumes:
       - ./screenshots:/app/screenshots
+    # configurando variáveis de ambiente
     environment:
+      # definindo display virtual para modo headless
       - DISPLAY=:99
+    # desabilitando restart automático
     restart: "no"
