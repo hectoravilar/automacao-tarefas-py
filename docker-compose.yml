@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  autotarefaspy:
+    build: .
+    container_name: autotarefaspy
+    volumes:
+      - ./screenshots:/app/screenshots
+    environment:
+      - DISPLAY=:99
+    restart: "no"
