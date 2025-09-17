@@ -3,28 +3,27 @@ import pandas
 import time
 import os
 from dotenv import load_dotenv
-
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys # <--- Corrigido aqui (K maiúsculo)
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import TimeoutException
 
 
-# carrega as variáveis de ambiente do arquivo .env
+# carregando as variaveis de ambiente do arquivo .env
 load_dotenv()
 
-# configura as opcoes do chrome para rodar em modo Headless 
+# configura as opcoes do chrome para rodar em modo Headless
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--no-sandbox")
 chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("--window-size=1920,1080")
 
-
-servico = ChromeService(ChromeDriverManager().install())
+servico = ChromeService(executable_path='/usr/bin/chromedriver')
 navegador = webdriver.Chrome(service=servico, options=chrome_options)
 
 
@@ -34,23 +33,24 @@ navegador.get("https://dlp.hashtagtreinamentos.com/python/intensivao/login")
 
 # fazendo Login
 # usando WebDriverWait para esperar ate 10 segundos para o campo aparecer.
-campo_email = WebDriverWait(navegador, 10).until(
-    EC.presence_of_element_located((By.ID, "email"))
-)
- 
-campo_email.send_keys("hectoravllr@gmail.com")
+try:
+    print("Procurando o botão de login e aguardando ficar clicável...")
+    botao_logar = WebDriverWait(navegador, 20).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "btn-primary"))
+    )
+    botao_logar.click()
+    print("Botão de login clicado com sucesso.")
 
-# no campo de senha,  Inspecionando o site, o ID é 'password'
-campo_senha = navegador.find_element(By.ID, "password")
-campo_senha.send_keys("123456")
-
-# clicando no botão de logar.
-botao_logar = navegador.find_element(By.CLASS_NAME, "btn-primary")
-botao_logar.click()
+except TimeoutException:
+    # se der um erro de timeout, tira um print e avisa
+    print("ERRO: O botão de login não ficou clicável em 10 segundos.")
+    navegador.save_screenshot("screenshot_erro.png")
+    print("Screenshot 'screenshot_erro.png' salvo para análise.")
+    # para o script para não continuar com o erro
+    raise
 
 
 # importando base de dados e cadastrando os produtos
- 
 tabela = pandas.read_csv("produtos.csv")
 
 for linha in tabela.index:
